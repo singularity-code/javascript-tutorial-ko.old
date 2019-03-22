@@ -175,7 +175,7 @@ How to fix it? One of solutions is to think like: "We fully handle the event in 
 
 Now the button-level menu works as intended. But the price is high. We forever deny access to information about right-clicks for any outer code, including counters that gather statistics and so on. That's quite unwise.
 
-An alternative solution would be to check in the `document` handler if the default action was prevented? If it is so, then the event was handled, and we don't need to react on it.
+An alternative solution would be to check in the `document` handler if the default action was prevented. If it is so, then the event was handled, and we don't need to react on it.
 
 
 ```html autorun height=80 no-beautify run
