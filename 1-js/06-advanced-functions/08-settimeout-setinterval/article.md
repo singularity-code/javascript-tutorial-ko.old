@@ -271,27 +271,39 @@ That's because a new call is planned at the end of the previous one.
 왜냐하면 새로운 호출이 계획될때는 이전것이 끝나는 곳이기 때문입니다.
 
 ````smart header="Garbage collection"
-When a function is passed in `setInterval/setTimeout`, an internal reference is created to it and saved in the scheduler. It prevents the function from being garbage collected, even if there are no other references to it.
+When a function is passed in `setInterval/setTimeout`, an internal reference is created to it and saved in the scheduler. 
+It prevents the function from being garbage collected, even if there are no other references to it.
+함수가 `setInterval/setTimeout`으로 넘겨졌을때, 내부참고가 생성되고 스케쥴러에 저장됩니다.
+그것에 다른 참조가 없을 지라도 함수가 가비지 컬렉션 되는것으로 부터 막아줍니다. 
 
 ```js
 // the function stays in memory until the scheduler calls it
+// 다음 함수는 스케쥴러가 호출할때 까지 메모리에 상주합니다
 setTimeout(function() {...}, 100);
 ```
 
 For `setInterval` the function stays in memory until `clearInterval` is called.
+`setInterval` 함수는 `clearInterval` 함수가 호출되기 전까지 메모리에 머무릅니다.
 
-There's a side-effect. A function references the outer lexical environment, so, while it lives, outer variables live too. They may take much more memory than the function itself. So when we don't need the scheduled function anymore, it's better to cancel it, even if it's very small.
+There's a side-effect. A function references the outer lexical environment, so, while it lives, outer variables live too. 
+They may take much more memory than the function itself. So when we don't need the scheduled function anymore, it's better to cancel it, even if it's very small.
+부작용은 있습니다. 함수가 외부 렉시컬 환경을 참조할때, 그것이 살아있는동안 외부 변수들도 살아있습니다.
+그것들은 함수자신보다 많은 메모리를 잡아먹을 수 있습니다. 그래서 스케쥴된 함수가 더 이상 필요없을때는 그 함수가 아무리 작더라도 취소하는게 좋습니다. 
 ````
 
 ## setTimeout(...,0)
 
 There's a special use case: `setTimeout(func, 0)`, or just `setTimeout(func)`.
+`setTimeout(func, 0)` 라는 특별한 사용예가 있습니다. 또는 간단히 `setTimeout(func)`.
 
 This schedules the execution of `func` as soon as possible. But scheduler will invoke it only after the current code is complete.
+이 스케쥴러는 `func`를 가능한 빨리 실행합니다. 그러나 스케쥴러는 현재 코드가 완료됬을때만 그것을 부를 것입니다.
 
 So the function is scheduled to run "right after" the current code. In other words, *asynchronously*.
+그래서 함수가 현재코드가 "바로 끝나면" 실행되도록 스케쥴됩니다. 다른말로 하면, *비동기적으로*.
 
 For instance, this outputs "Hello", then immediately "World":
+예를 들면, 다음코드는 "World" 다음에 "Hello"를 바로 출력합니다.
 
 ```js run
 setTimeout(() => alert("World"));
@@ -300,18 +312,29 @@ alert("Hello");
 ```
 
 The first line "puts the call into calendar after 0ms". But the scheduler will only "check the calendar" after the current code is complete, so `"Hello"` is first, and `"World"` -- after it.
+첫번째 줄이 "달력에 0ms가 지난후에 호출을 하도록 넣습니다". 그러나 스케쥴러는 "달력확인" 을 오직 현재 코드가 완료되어야만 진행할것입니다. `"Hello"` 가 먼저 출력되고 `"World"` 가 그 다음 입니다.
 
 ### Splitting CPU-hungry tasks
+### CPU 를 많이 잡아먹는 작업들을 나누기
 
 There's a trick to split CPU-hungry tasks using `setTimeout`.
+`setTimeout`을 이용해서 CPU를 많이 잡아먹는 작업들을 나누는 편법이 있습니다.
 
-For instance, a syntax-highlighting script (used to colorize code examples on this page) is quite CPU-heavy. To highlight the code, it performs the analysis, creates many colored elements, adds them to the document -- for a big text that takes a lot. It may even cause the browser to "hang", which is unacceptable.
+For instance, a syntax-highlighting script (used to colorize code examples on this page) is quite CPU-heavy. To highlight the code, 
+it performs the analysis, creates many colored elements, adds them to the document -- for a big text that takes a lot. It may even cause the browser to "hang", which is unacceptable.
+예를 들면, (이 페이지의 코드 예제에 색을 입히는 데 사용되는) 구문 강조 스크립트는 상당히 CPU 소모가 많습니다. 
+코드를 강조하기 위해서는 특별한 분석이 실행되고, 색칠된 요소들을 많이 생성한후 문서에 추가합니다. -- 큰 문서의 경우 엄청나게 큰 작업입니다. 아마도 브라우저가 "멈추는" 받아 들일수 없는 경우가 생길 수도 있습니다.
 
 So we can split the long text into pieces. First 100 lines, then plan another 100 lines using `setTimeout(..., 0)`, and so on.
+그래서 긴문장은 쪼개는것이 좋습니다. 첫번째 100 줄까지, 그리고는 다음 100줄을 `setTimeout(..., 0)`를 사용해서 나눕니다. 그리고 반복합니다.
 
 For clarity, let's take a simpler example for consideration. We have a function to count from `1` to `1000000000`.
+확실히 하기위해, 간단한 예제를 보겠습니다. `1` 에서 `1000000000` 까지 세는 함수가 있습니다.
 
-If you run it, the CPU will hang. For server-side JS that's clearly noticeable, and if you are running it in-browser, then try to click other buttons on the page -- you'll see that whole JavaScript actually is paused, no other actions work until it finishes.
+If you run it, the CPU will hang. For server-side JS that's clearly noticeable, and if you are running it in-browser, 
+then try to click other buttons on the page -- you'll see that whole JavaScript actually is paused, no other actions work until it finishes.
+이것을 실행하면 CPU는 멈출것입니다. 서버쪽 JS는 확실히 이것을 알아차릴 수 있습니다. 그리고 만약에 브라우저에서 이것을 실행하고 다른화면의 버튼을 클릭하려고 하면
+-- 전체 자바스크립트가 중지된 것을 볼수 있으, 완료 될 때가지 다른 행동들은 동작하지 않습니다.
 
 ```js run
 let i = 0;
@@ -332,8 +355,10 @@ count();
 ```
 
 The browser may even show "the script takes too long" warning (but hopefully it won't, because the number is not very big).
+브라우저는 아마도 "스크립트가 너무 오래걸립니다"라는 경고를 보여줄지도 모릅니다 (그러나 숫자가 아주 크지는 않기때문에, 아마도 아닐것입니다).
 
 Let's split the job using the nested `setTimeout`:
+중첩된 `setTimeout`을 이용해서 나누어 보겠습니다.
 
 ```js run
 let i = 0;
@@ -359,6 +384,7 @@ count();
 ```
 
 Now the browser UI is fully functional during the "counting" process.
+이제 브라우저 UI 는 "숫자를 세는 동안에도" 완전히 작동합니다.
 
 We do a part of the job `(*)`:
 
@@ -367,14 +393,19 @@ We do a part of the job `(*)`:
 3. ...and so on, the `while` checks if `i` is evenly divided by `1000000`.
 
 Then the next call is scheduled in `(**)` if we're not done yet.
+그리고 끝나지 않았다면 다음 호출이 `(**)` 안에 스케쥴됩니다.
 
 Pauses between `count` executions provide just enough "breath" for the JavaScript engine to do something else, to react to other user actions.
+`count` 실행 사이의 일시 중지는 자바스크립트 엔진이 다른 작업을 수행하고 다른 사용자 작업에 반응 할 수있을 정도의 "숨실수" 있는 환경을 제공합니다.
 
 The notable thing is that both variants -- with and without splitting the job by `setTimeout` -- are comparable in speed. There's no much difference in the overall counting time.
+중요한것은 -- `setTimeout` 으로 작업을 나누던 나누지 않던 -- 속도면에서 비슷하다는 것입니다. 전체 계산 시간에는 별다른 차이가 없습니다.
 
 To make them closer, let's make an improvement.
+이것을 좀 더 알아보기위해 개선해 보겠습니다.
 
 We'll move the scheduling in the beginning of the `count()`:
+`count()`의 초반에 스케쥴하는 부분을 옮기겠습니다.
 
 ```js run
 let i = 0;
@@ -402,13 +433,30 @@ count();
 ```
 
 Now when we start to `count()` and know that we'll need to `count()` more, we schedule that immediately, before doing the job.
+이제 `count()`가 시작되고 `count()`가 더 필요하다는 걸 알게 됩니다, 작업을 하기전에 그것을 바로 스케쥴합니다.
 
 If you run it, it's easy to notice that it takes significantly less time.
+만약에 실행하면, 훨씬 적은 시간이 걸리는 것을 쉽게 알 수 있습니다.
 
 ````smart header="Minimal delay of nested timers in-browser"
-In the browser, there's a limitation of how often nested timers can run. The [HTML5 standard](https://www.w3.org/TR/html5/webappapis.html#timers) says: "after five nested timers, the interval is forced to be at least four milliseconds.".
+In the browser, there's a limitation of how often nested timers can run.
+브라우저에는 중첩 타이머를 실행할 수있는 빈도의 한계가 있습니다.
 
-Let's demonstrate what it means with the example below. The `setTimeout` call in it re-schedules itself after `0ms`. Each call remembers the real time from the previous one in the `times` array. What do the real delays look like? Let's see:
+The [HTML5 standard](https://www.w3.org/TR/html5/webappapis.html#timers) says: 
+[HTML5 standard](https://www.w3.org/TR/html5/webappapis.html#timers)에서 언급하길:
+
+"after five nested timers, the interval is forced to be at least four milliseconds.".
+"다섯 개의 중첩 된 타이머 이후에 간격은 적어도 4 밀리 초가되어야합니다.".
+
+
+Let's demonstrate what it means with the example below.
+The `setTimeout` call in it re-schedules itself after `0ms`. 
+Each call remembers the real time from the previous one in the `times` array. What do the real delays look like? Let's see:
+아래 예를 통해 의미를 설명해 보겠습니다.
+`setTimeout` 호출은 `0ms` 후에 스스로를 스케쥴합니다.
+각 호출은 `times` 배열에있는 이전 호출로부터 실시간을 기억합니다. 
+실제 지연은 어떠한가요? 살펴보겠습니다.
+
 
 ```js run
 let start = Date.now();
@@ -426,19 +474,33 @@ setTimeout(function run() {
 ```
 
 First timers run immediately (just as written in the spec), and then the delay comes into play and we see `9, 15, 20, 24...`.
+첫 번째 타이머는 즉시 실행되고 (규격과 마찬가지로) 지연이 발생하고 '9, 15, 20, 24 ...'라고 표시됩니다.
 
 That limitation comes from ancient times and many scripts rely on it, so it exists for historical reasons.
+이러한 제한은 오래전부터 전해왔으며 많은 스크립트가 사용하므로, 아직도 역사적인 이유로 남아있습니다.
 
-For server-side JavaScript, that limitation does not exist, and there exist other ways to schedule an immediate asynchronous job, like [process.nextTick](https://nodejs.org/api/process.html) and [setImmediate](https://nodejs.org/api/timers.html) for Node.JS. So the notion is browser-specific only.
+For server-side JavaScript, that limitation does not exist, and there exist other ways to schedule an immediate asynchronous job,
+서버 측 자바스크립트의 경우, 이러한 제한은 존재하지 않으며 즉시 비동기 작업을 예약하는 다른 방법이 있습니다.
+
+Node.JS 에는 [process.nextTick](https://nodejs.org/api/process.html) 와 [setImmediate](https://nodejs.org/api/timers.html) 가 있습니다. 
+So the notion is browser-specific only.
+그래서 위의 개념은 브라우저마다 다릅니다.
+
 ````
 
 ### Allowing the browser to render
+### 브라우저에서 렌더링 허용
 
 Another benefit for in-browser scripts is that they can show a progress bar or something to the user. That's because the browser usually does all "repainting" after the script is complete.
+브라우저 내 스크립트의 또 다른 이점은 진행률 표시처럼 사용자에게 무언가를 보여줄 수 있다는 것입니다. 
+스크립트가 완료된 후 브라우저가 일반적으로 "다시 그리기"를 실행하기 때문입니다.
 
 So if we do a single huge function then even if it changes something, the changes are not reflected in the document till it finishes.
+따라서 하나의 커다란 기능을 수행하는 경우 무언가를 변경하더라도 변경 사항은 문서가 완료 될 때까지 반영되지 않습니다.
 
 Here's the demo:
+여기 예제가 있습니다.
+
 ```html run
 <div id="progress"></div>
 
@@ -459,8 +521,10 @@ Here's the demo:
 ```
 
 If you run it, the changes to `i` will show up after the whole count finishes.
+실행하면 전체 카운트가 끝난 후 'i'의 변경 사항이 표시됩니다.
 
 And if we use `setTimeout` to split it into pieces then changes are applied in-between the runs, so this looks better:
+그리고 만약 `setTimeout`을 조각으로 나눠서 사용한다면, 변경이 실행 사이에 적용됩니다.
 
 ```html run
 <div id="progress"></div>
@@ -487,8 +551,10 @@ And if we use `setTimeout` to split it into pieces then changes are applied in-b
 ```
 
 Now the `<div>` shows increasing values of `i`.
+이제 `<div>` 는 `i` 의 값이 증가하는 것을 보여줍니다.
 
 ## Summary
+## 요약
 
 - Methods `setInterval(func, delay, ...args)` and `setTimeout(func, delay, ...args)` allow to run the `func` regularly/once after `delay` milliseconds.
 - To cancel the execution, we should call `clearInterval/clearTimeout` with the value returned by `setInterval/setTimeout`.
@@ -496,14 +562,25 @@ Now the `<div>` shows increasing values of `i`.
 - Zero-timeout scheduling `setTimeout(...,0)` is used to schedule the call "as soon as possible, but after the current code is complete".
 
 Some use cases of `setTimeout(...,0)`:
+`setTimeout(...,0)`가 사용될때
+
 - To split CPU-hungry tasks into pieces, so that the script doesn't "hang"
+- CPU를 많이 먹는 작업을 작게 나누어 스크립트가 "정지"하는 경우가 없게 할때
 - To let the browser do something else while the process is going on (paint the progress bar).
+- 브라우저가 프로세스를 하는동안(프로그레스 바를 칠하는 것같은) 무언가 다른 것을 할 수 있게 하고싶을때
 
 Please note that all scheduling methods do not *guarantee* the exact delay. We should not rely on that in the scheduled code.
+모든 스케쥴하는 방법들은 정확한 딜레이를 *보장*하지 않습니다. 스케쥴된 코드에 그것을 의존해서는 안됩니다.
 
 For example, the in-browser timer may slow down for a lot of reasons:
+예를들면, 브라우저에 탑재된 타이머는 여러가지 이유로 느려질 수 있습니다.
+
 - The CPU is overloaded.
+- CPU가 오버로드 되었다.
 - The browser tab is in the background mode.
+- 브라우저 탭이 백그라운드 모드가 되엇다.
 - The laptop is on battery.
+- 노트북이 배터리모드 일때.
 
 All that may increase the minimal timer resolution (the minimal delay) to 300ms or even 1000ms depending on the browser and settings.
+최소한 브라우저 해상도와 설정에 따라 최소 타이머 해상도 (최소 지연 시간)를 300ms 또는 1000ms 까지 늘릴 수 있습니다.
