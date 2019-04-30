@@ -7,17 +7,17 @@
 - `setTimeout` 일정 시간이 지난 후에 함수를 실행합니다.
 - `setInterval` 실행되고 일정 시간 동안 함수를 계속 실행합니다.
 
-이런 방법들은 자바스크립트의 규격은 아닙니다만 거의 모든 환경들이 내부 스케줄러와 그것을 지원하는 매서드들을 가지고 있습니다. 특별히, 대부분의 브라우저와 Node.JS 에서 지원됩니다.
+이런 방법들은 자바스크립트의 규격은 아닙니다만 거의 모든 환경들이 내부 스케줄러와 지원하는 매서드들을 가지고 있습니다. 특별히, 대부분의 브라우저와 Node.JS 에서 지원됩니다.
 
 ## setTimeout
 
-문법
+문법:
 
 ```js
 let timerId = setTimeout(func|code, [delay], [arg1], [arg2], ...)
 ```
 
-매개변수
+매개변수:
 
 `func|code`
 : 함수 또는 코드 문자열이 실행됩니다.
@@ -41,7 +41,7 @@ setTimeout(sayHi, 1000);
 */!*
 ```
 
-인수들의 사용
+인수들의 사용:
 
 ```js run
 function sayHi(phrase, who) {
@@ -55,7 +55,7 @@ setTimeout(sayHi, 1000, "Hello", "John"); // Hello, John
 
 만약에 첫 번째 인수가 문자이면 자바스크립트는 함수를 생성합니다.
 
-그래서 다음과 같이 해도 작동하게 됩니다.
+그래서 다음과 같이 해도 작동하게 됩니다:
 
 ```js run no-beautify
 setTimeout("alert('Hello')", 1000);
@@ -67,20 +67,22 @@ setTimeout("alert('Hello')", 1000);
 setTimeout(() => alert('Hello'), 1000);
 ```
 
-````smart header="Pass a function, but don't run it"
-Novice developers sometimes make a mistake by adding brackets `()` after the function:
+````smart header="함수는 넘기지만 실행하면 안 됩니다"
+초보 개발자들은 때때로 함수 뒤에 `()` 을 붙이는 실수를 합니다:
 
 ```js
-// wrong!
+// 잘못된 코드!
 setTimeout(sayHi(), 1000);
 ```
-That doesn't work, because `setTimeout` expects a reference to function. And here `sayHi()` runs the function, and the *result of its execution* is passed to `setTimeout`. In our case the result of `sayHi()` is `undefined` (the function returns nothing), so nothing is scheduled.
+`setTimeout` 가 함수를 참고하려고 하기 때문에 작동하지 않습니다. 그리고 여기서 `sayHi()`은 함수를 실행합니다.
+그런다음 *함수의 실행결과* 가 `setTimeout`으로 넘겨집니다. 이 경우에 `sayHi()`의 결과값은 `undefined` 입니다 (함수의 반환 값이 없기 때문에). 그래서 스케줄 되는 건 아무것도 없습니다.
 ````
 
 ### clearTimeout 로 취소하기
 
 `setTimeout` 을 실행하면 "timer identifier" 를 반환합니다. 실행단계에서 `timeId`를 사용해서 취소할 수 있습니다.
-취소하기 위한 문법
+
+취소하기 위한 문법:
 
 ```js
 let timerId = setTimeout(...);
@@ -94,7 +96,7 @@ let timerId = setTimeout(() => alert("never happens"), 1000);
 alert(timerId); // timer identifier
 
 clearTimeout(timerId);
-alert(timerId); // same identifier (doesn't become null after canceling)
+alert(timerId); // 똑같은 identifier (취소후에 null 값이 되지 않음)
 ```
 
 `alert`결과로 the timer identifier는 숫자라는 것을 알 수 있습니다. 다른 환경에서는 조금 다를 수 있습니다. 예를 들면, Node.JS는 하나의 타이머 오브젝트를 추가적인 메서드들과 반환합니다.
@@ -118,17 +120,18 @@ let timerId = setInterval(func|code, [delay], [arg1], [arg2], ...)
 다음 예제는 메시지를 2초마다 보여줍니다. 5초 후에는 정지됩니다.
 
 ```js run
-// repeat with the interval of 2 seconds
+// 2초간격으로 반복
 let timerId = setInterval(() => alert('tick'), 2000);
 
-// after 5 seconds stop
+// 5초후에 정지
 setTimeout(() => { clearInterval(timerId); alert('stop'); }, 5000);
 ```
 
-```smart header="Modal windows freeze time in Chrome/Opera/Safari"
-In browsers IE and Firefox the internal timer continues "ticking" while showing `alert/confirm/prompt`, but in Chrome, Opera and Safari the internal timer becomes "frozen".
+```smart header="크롬/오페라/사파리에서 모달 윈도는 시간을 정지시킵니다"
+IE와 파이어폭스 브라우저의 내부 타이머는 `alert/confirm/prompt`를 보여주는 동안에도 틱 되고 있습니다. 그러나 크롬, 오페라, 사파리의 내부 타이머는 "정지" 됩니다.
 
-So if you run the code above and don't dismiss the `alert` window for some time, then in Firefox/IE next `alert` will be shown immediately as you do it (2 seconds passed from the previous invocation), and in Chrome/Opera/Safari -- after 2 more seconds (timer did not tick during the `alert`).
+그래서 위의 코드를 실행하고 `alert` 윈도를 바로 닫지 않으면 파이어폭스 / IE에서 경고가 즉시 표시됩니다.
+(이전 호출에서 2초가 경과 한) 크롬 / 오페라 / 사파리에서 - 2초 후에 (`alert` 중에는 타이머가 틱 되지 않음).
 ```
 
 ## 재귀적인 setTimeout
@@ -136,7 +139,7 @@ So if you run the code above and don't dismiss the `alert` window for some time,
 주기적으로 실행하게 하는 방법에는 크게 2가지가 있습니다.
 
 하나는 `setInterval`이고 다른 하나는 `setTimeout`를 순회하는 것 입니다.
-다음과 같습니다.
+다음과 같습니다:
 
 ```js
 /** instead of:
@@ -157,7 +160,7 @@ let timerId = setTimeout(function tick() {
 
 예를 들면, 5초마다 데이터값을 얻기 위해 서버에 request를 보내는 서비스를 작성해야 한다고 할 때, 이때 서버는 오버로드 될 수 있고 이때는 시차를 10, 20, 40초로 증가시켜야 할 것입니다...
 
-여기에 의사 코드가 있습니다
+여기에 의사 코드가 있습니다:
 
 ```js
 let delay = 5000;
@@ -166,7 +169,7 @@ let timerId = setTimeout(function request() {
   ...send request...
 
   if (request failed due to server overload) {
-    // increase the interval to the next run
+    // 다음 실행 간격을 늘립니다
     delay *= 2;
   }
 
@@ -180,7 +183,7 @@ let timerId = setTimeout(function request() {
 
 **회귀적인 `setTimeout`은 다음 실행과의 사이에서 딜레이를 보장합니다. `setInterval`은 아닙니다.**
 
-두 코드의 요소들을 비교해 보겠습니다. 첫 번째는 `setinterval`입니다.
+두 코드의 요소들을 비교해 보겠습니다. 첫 번째는 `setinterval`입니다:
 
 ```js
 let i = 1;
@@ -189,7 +192,7 @@ setInterval(function() {
 }, 100);
 ```
 
-두 번째는 재귀적인 `setTimeout`입니다.
+두 번째는 재귀적인 `setTimeout`입니다:
 
 ```js
 let i = 1;
@@ -199,7 +202,7 @@ setTimeout(function run() {
 }, 100);
 ```
 
-`setInterval` 은 내부적인 스케줄러가 `func(i)`를 100ms마다 실행합니다.
+`setInterval` 은 내부적인 스케줄러가 `func(i)`를 100ms마다 실행합니다:
 
 ![](setinterval-interval.png)
 
@@ -215,7 +218,7 @@ setTimeout(function run() {
 
 이런 특수한 경우에는, 함수는 항상 `delay`ms 보다 늦게 실행됩니다, 그리고는 호출들이 모든 것을 멈추지 않고 계속될 것입니다.
 
-회귀적인 `setTimeout`에 대한 그림이 있습니다.
+회귀적인 `setTimeout`에 대한 그림이 있습니다:
 
 ![](settimeout-interval.png)
 
@@ -246,7 +249,7 @@ setTimeout(function() {...}, 100);
 
 그래서 함수가 현재 코드가 "바로 끝나면" 실행되도록 스케줄 됩니다. 다른 말로 하면, *비동기적으로*.
 
-예를 들면, 다음 코드는 "World" 다음에 "Hello"를 바로 출력합니다.
+예를 들면, 다음 코드는 "World" 다음에 "Hello"를 바로 출력합니다:
 
 ```js run
 setTimeout(() => alert("World"));
@@ -277,7 +280,7 @@ let start = Date.now();
 
 function count() {
 
-  // do a heavy job
+  // 무거운 작업을 진행
   for (let j = 0; j < 1e9; j++) {
     i++;
   }
@@ -290,7 +293,7 @@ count();
 
 브라우저는 아마도 "스크립트가 너무 오래 걸립니다"라는 경고를 보여줄지도 모릅니다. (그러나 숫자가 아주 크지는 않기 때문에, 아마도 아닐 것입니다).
 
-중첩된 `setTimeout`을 이용해서 나누어 보겠습니다.
+중첩된 `setTimeout`을 이용해서 나누어 보겠습니다:
 
 ```js run
 let i = 0;
@@ -299,7 +302,7 @@ let start = Date.now();
 
 function count() {
 
-  // do a piece of the heavy job (*)
+  // 무거운 작업중의 일부를 진행 (*)
   do {
     i++;
   } while (i % 1e6 != 0);
@@ -307,7 +310,7 @@ function count() {
   if (i == 1e9) {
     alert("Done in " + (Date.now() - start) + 'ms');
   } else {
-    setTimeout(count); // schedule the new call (**)
+    setTimeout(count); // 새로운 호출을 스케줄 (**)
   }
 
 }
@@ -317,11 +320,11 @@ count();
 
 이제 브라우저 UI는 "숫자를 세는 동안에도" 완전히 작동합니다.
 
-We do a part of the job `(*)`:
+`(*)` 작업의 일부를 합니다:
 
-1. First run: `i=1...1000000`.
-2. Second run: `i=1000001..2000000`.
-3. ...and so on, the `while` checks if `i` is evenly divided by `1000000`.
+1. 첫번째 실행: `i=1...1000000`.
+2. 두번째 실행: `i=1000001..2000000`.
+3. ...그리고 계속, `while`은 `i`가 `1000000` 으로 균등하게 나뉘어져 있는지 확인합니다.
 
 그리고 끝나지 않았다면 다음 호출이 `(**)` 안에 스케줄 됩니다.
 
@@ -331,7 +334,7 @@ We do a part of the job `(*)`:
 
 이것을 좀 더 알아보기 위해 개선해 보겠습니다.
 
-`count()`의 초반에 스케줄 하는 부분을 옮기겠습니다.
+`count()`의 초반에 스케줄 하는 부분을 옮기겠습니다:
 
 ```js run
 let i = 0;
@@ -362,7 +365,7 @@ count();
 
 만약에 실행하면, 훨씬 적은 시간이 걸리는 것을 쉽게 알 수 있습니다.
 
-````smart header="Minimal delay of nested timers in-browser"
+````smart header="브라우저에서 중첩된 타이머의 지연 최소화"
 브라우저에는 중첩 타이머를 실행할 수 있는 빈도의 한계가 있습니다.
 
 [HTML5 standard](https://www.w3.org/TR/html5/webappapis.html#timers)에서 언급하길:
@@ -409,7 +412,7 @@ Node.JS 에는 [process.nextTick](https://nodejs.org/api/process.html) 와 [setI
 
 따라서 하나의 커다란 기능을 수행하는 경우 무언가를 변경하더라도 변경 사항은 문서가 완료될 때까지 반영되지 않습니다.
 
-여기 예제가 있습니다.
+여기 예제가 있습니다:
 
 ```html run
 <div id="progress"></div>
